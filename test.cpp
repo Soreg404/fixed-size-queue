@@ -68,7 +68,7 @@ TEST(FS_QueueTest, push_and_pop_blocking) {
 
 	char popped[strlen(TESTS_SAMPLE_TEXT) + 1]{ 0 };
 	for(int i = 0; !completed_pushing || queue.size();) {
-		int ps = queue.popBlocking(popped + i, queue.awaitData());
+		int ps = queue.popBlocking(popped + i, queue.wait());
 		i += ps;
 		printf("popped %i bytes, text: %.*s\n", ps, i, popped);
 	}
@@ -97,23 +97,21 @@ int main(int argc, char **argv) {
 	FS_Queue tc(5);
 
 	bool stillPushing = true;
-	const char *sample_text = "hello xworld! abcdefgh";
+	const char *sample_text = "hello xworld! abcdxefgh";
 
 	std::thread th([&] {
 		tc.pushBlocking(sample_text, strlen(sample_text));
-		printf("\npush blocking ended");
+		printf("\npush blocking ended\n");
 		stillPushing = false;
 	});
 
-	char ch = 0;
 	while(tc.size() || stillPushing) {
-		tc.popBlocking(&ch, 1);
-		printf("popped [%c]", ch);
-		if(ch == 'x') {
+		char c = tc.pop_one_b();
+		printf("popped [%c]", c);
+		if(c == 'x') {
 			printf("\ninterrupting\n");
 			tc.interrupt();
 		}
-		ch = 0;
 		std::cin.get();
 	}
 
