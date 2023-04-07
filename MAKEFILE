@@ -1,0 +1,4 @@
+CC=g++
+
+test.exe: test.cpp fs-queue.hpp
+	$(CC) -o $@ test.cpp -I $(CSDK) -L $(LIBx64) -lgtest-d

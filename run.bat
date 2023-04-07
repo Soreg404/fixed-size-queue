@@ -1,0 +1,1 @@
+@test --gtest_color=yes
